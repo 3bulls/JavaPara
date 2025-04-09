@@ -17,6 +17,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.stage.FileChooser.*;
+import javafx.util.Builder;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +35,8 @@ import javax.swing.ButtonGroup;
 public class Paint extends Application {
   /** 描画領域 */
   Canvas canvas;
+  Pane canvasPane;
+  List<Canvas> layers;
   /** 描画領域のGraphicsContext */
   GraphicsContext gc;
   /** 直前のポインタのx座標 */
@@ -54,12 +58,14 @@ public class Paint extends Application {
   Button save;
   /** record all the strokes*/
   List<OneStroke> strokes;
+  Button addLayer;
 
   /** RED GREEN BLUE */
-  int RED;
-  int BLUE;
-  int GREEN;
-  double OPACITY;
+  int RED = 0;
+  int BLUE = 1;
+  int GREEN = 0;
+  double OPACITY = 1.0;
+  double Width = 4;
 
   /**
    * お絵描きプログラムの準備をして、ウィンドウを開きます
@@ -67,6 +73,11 @@ public class Paint extends Application {
   public void start(Stage stage){
     Group group = new Group();
     canvas = new Canvas(SIZE,SIZE);
+    layers = new ArrayList<Canvas>();
+    canvasPane = new Pane();
+    canvasPane.setPrefSize(SIZE,SIZE);
+    canvasPane.getChildren().add(canvas);
+
     strokes = new ArrayList<OneStroke>();
     gc = canvas.getGraphicsContext2D();
     drawShapes(gc);
@@ -153,9 +164,45 @@ public class Paint extends Application {
     clear.setOnAction(e->{
         gc.setFill(Color.WHITE);
         gc.fillRect(0,0,SIZE,SIZE);});
-    Rectangle colorSquare = new Rectangle(20,20,new Color(RED, GREEN, BLUE, OPACITY));
-    hb.getChildren().addAll(save,undo,rotate,upload,clear,colorSquare);
+    Rectangle colorSquare = new Rectangle(20,20,new Color(0, 0, 1, 1));
+    // TODO: too many redundant code, need to abstract 
+    addLayer = new Button("add");
+    addLayer.setOnAction(e->{
+      layers.add(canvas);
+      canvas = new Canvas(SIZE,SIZE);
+      canvasPane.getChildren().add(canvas);
+      gc = canvas.getGraphicsContext2D();
+      gc.setFill(new Color(1,1,1,0));
+      gc.fillRect(0,0,SIZE,SIZE);
+      gc.setStroke(Color.rgb(RED,GREEN,BLUE,OPACITY));
+      System.out.println(""+RED+" "+GREEN+" "+BLUE);
+      gc.setLineWidth(Width);
+
+      strokes = new ArrayList<OneStroke>();
+      canvas.setOnMousePressed(ev->{
+          oldx = ev.getX();
+          oldy = ev.getY();
+          OneStroke oneStroke = new OneStroke();
+          strokes.add(oneStroke);
+        });
+      canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED,
+                          new EventHandler<MouseEvent>(){
+                            public void handle(MouseEvent ev){
+                              gc.strokeLine(oldx, oldy, ev.getX(), ev.getY());
+                              LineData oneline = new LineData(oldx,oldy,ev.getX(),ev.getY());
+                              OneStroke currentStroke = strokes.getLast();
+                              currentStroke.add(oneline);
+                              oldx = ev.getX();
+                              oldy = ev.getY();
+                              // TODO: olny for debug
+                            //  System.out.println(""+oldx+" "+oldy);
+                            }
+                          });
+    });
+    
+    hb.getChildren().addAll(save,undo,rotate,upload,clear,colorSquare,addLayer);
     hb.setAlignment(Pos.CENTER);
+    
 
     BorderPane bp = new BorderPane();
     VBox vb = new VBox();
@@ -164,26 +211,23 @@ public class Paint extends Application {
     Slider sliderb = new Slider(0, 1, 1);
     Slider slidert = new Slider(0, 1, 1);
     Slider sliderwidth = new Slider(0, 20, 1);
-    RED = 0;
-    BLUE = 0;
-    GREEN = 0;
     
     sliderr.valueProperty().addListener((ObservableValue<? extends Number> ov,
                                          Number oldv, Number nv)->{
                                           RED = (int)(255.0 * nv.floatValue());
-                                          gc.setStroke(Color.rgb(RED,GREEN,BLUE));
+                                          gc.setStroke(Color.rgb(RED,GREEN,BLUE,OPACITY));
                                           colorSquare.setFill(Color.rgb(RED,GREEN,BLUE,OPACITY));
       });
     sliderg.valueProperty().addListener((ObservableValue<? extends Number> ov,
                                          Number oldv, Number nv)->{
                                           GREEN = (int)(255.0 * nv.floatValue());
-                                          gc.setStroke(Color.rgb(RED,GREEN,BLUE));
+                                          gc.setStroke(Color.rgb(RED,GREEN,BLUE,OPACITY));
                                           colorSquare.setFill(Color.rgb(RED,GREEN,BLUE,OPACITY));
       });
     sliderb.valueProperty().addListener((ObservableValue<? extends Number> ov,
                                          Number oldv, Number nv)->{
                                           BLUE = (int)(255.0 * nv.floatValue());
-                                          gc.setStroke(Color.rgb(RED,GREEN,BLUE));
+                                          gc.setStroke(Color.rgb(RED,GREEN,BLUE,OPACITY));
                                           colorSquare.setFill(Color.rgb(RED,GREEN,BLUE,OPACITY));
       });
 
@@ -191,11 +235,12 @@ public class Paint extends Application {
                                         Number oldv, Number nv)->{
                                         OPACITY  = nv.floatValue();
                                         gc.setStroke(Color.rgb(RED,GREEN,BLUE,OPACITY));
+                                        colorSquare.setFill(Color.rgb(RED,GREEN,BLUE,OPACITY));
     });
     sliderwidth.valueProperty().addListener((ObservableValue<? extends Number> ov,
                                         Number oldv, Number nv)->{
-                                        float width = nv.floatValue();
-                                        gc.setLineWidth(width);
+                                        Width= nv.floatValue();
+                                        gc.setLineWidth(Width);
     });
 
 
@@ -207,7 +252,7 @@ public class Paint extends Application {
     vb.getChildren().add(sliderwidth);
     vb.getChildren().add(hb);
     bp.setTop(vb);
-    bp.setCenter(canvas);
+    bp.setCenter(canvasPane);
     Scene scene = new Scene(bp);
     stage.setScene(scene);
     stage.setTitle("JavaFX Draw");
@@ -229,7 +274,7 @@ public class Paint extends Application {
     gc.fillRect(0,0,SIZE,SIZE);
     gc.setFill(Color.GREEN);
     gc.setStroke(Color.BLUE);
-    gc.setLineWidth(4);
+    gc.setLineWidth(Width);
     gc.strokeLine(40, 10, 10, 40);
     gc.fillOval(60, 10, 30, 30);
     gc.strokeOval(110, 10, 30, 30);
