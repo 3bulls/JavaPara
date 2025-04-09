@@ -59,6 +59,7 @@ public class Paint extends Application {
   /** record all the strokes*/
   List<OneStroke> strokes;
   Button addLayer;
+  Button removeLayer;
 
   /** RED GREEN BLUE 0-255*/
   int RED = 0;
@@ -74,6 +75,7 @@ public class Paint extends Application {
     Group group = new Group();
     canvas = new Canvas(SIZE,SIZE);
     layers = new ArrayList<Canvas>();
+    layers.add(canvas);
     canvasPane = new Pane();
     canvasPane.setPrefSize(SIZE,SIZE);
     canvasPane.getChildren().add(canvas);
@@ -175,7 +177,6 @@ public class Paint extends Application {
       gc.setFill(new Color(1,1,1,0));
       gc.fillRect(0,0,SIZE,SIZE);
       gc.setStroke(Color.rgb(RED,GREEN,BLUE,OPACITY));
-      System.out.println(""+RED+" "+GREEN+" "+BLUE);
       gc.setLineWidth(Width);
 
       strokes = new ArrayList<OneStroke>();
@@ -194,13 +195,21 @@ public class Paint extends Application {
                               currentStroke.add(oneline);
                               oldx = ev.getX();
                               oldy = ev.getY();
-                              // TODO: olny for debug
-                             System.out.println(gc.getStroke());
                             }
                           });
     });
+    removeLayer = new Button("remove");
+    removeLayer.setOnAction(ev->{
+      if (layers.size()==1){
+        return;
+      }
+      canvasPane.getChildren().remove(canvasPane.getChildren().size()-1);
+      layers.remove(layers.size()-1);
+      canvas = layers.get(layers.size()-1);
+      gc = canvas.getGraphicsContext2D();
+    });
     
-    hb.getChildren().addAll(save,undo,rotate,upload,clear,colorSquare,addLayer);
+    hb.getChildren().addAll(save,undo,rotate,upload,clear,colorSquare,addLayer,removeLayer);
     hb.setAlignment(Pos.CENTER);
     
 
