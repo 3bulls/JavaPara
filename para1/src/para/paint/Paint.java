@@ -60,9 +60,9 @@ public class Paint extends Application {
   List<OneStroke> strokes;
   Button addLayer;
 
-  /** RED GREEN BLUE */
+  /** RED GREEN BLUE 0-255*/
   int RED = 0;
-  int BLUE = 1;
+  int BLUE = 255;
   int GREEN = 0;
   double OPACITY = 1.0;
   double Width = 4;
@@ -195,7 +195,7 @@ public class Paint extends Application {
                               oldx = ev.getX();
                               oldy = ev.getY();
                               // TODO: olny for debug
-                            //  System.out.println(""+oldx+" "+oldy);
+                             System.out.println(gc.getStroke());
                             }
                           });
     });
