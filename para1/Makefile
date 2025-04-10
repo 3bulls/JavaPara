@@ -10,7 +10,7 @@ JAVABIN=
 ## set javafx-sdk directory your installed
 ## this setting affects PCs that are not in the CSC room
 #####
-JAVAFXMODULE=./javafx-sdk-21.0.6/lib
+JAVAFXMODULE=../javafx-sdk-21.0.6/lib
 
 #####
 ##  set proxy server address and port number, if your machine connects

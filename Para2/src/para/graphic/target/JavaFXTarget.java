@@ -151,6 +151,13 @@ public class JavaFXTarget implements Target{
       Attribute attr){
     canvas.drawRectangle(id, x, y, w, h, attr);
   }
+  /** 
+   *  triangleを描画する
+   */
+  @Override
+  public void drawTriangle(int id,int x0,int y0,int x1,int y1,int x2,int y2, Attribute attr){
+    canvas.drawTriangle(id,x0,y0,x1,y1,x2,y2,attr);
+  }
 
   /** 
    *  画像図形を描画する

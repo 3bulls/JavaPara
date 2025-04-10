@@ -195,5 +195,18 @@ public class JavaFXCanvasTarget extends Canvas implements Target{
       graphics.drawImage(img,x,y,null);
     } 
   }
-
+  /** 
+   *  triangleを描画する
+   */
+  @Override
+  public void drawTriangle(int id,int x0,int y0,int x1,int y1,int x2,int y2, Attribute attr){
+    setColor(attr);
+    int[] xpoints = {x0,x1,x2};
+    int[] ypoints = {y0,y1,y2};
+    if(attr!=null && attr.getFill()){
+      graphics.fillPolygon(xpoints,ypoints,3);
+    }else{
+      graphics.drawPolygon(xpoints,ypoints,3);
+    }
+  }
 }

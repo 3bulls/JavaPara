@@ -82,6 +82,7 @@ public class Calculator extends Application {
       output.setText(result);
     });
     
+    // add a keyboard listener on scene. CAUTION: setOnKeyTyped and setOnKeyPressed are different!
     scene.setOnKeyTyped(e->{
       String pressedChar = e.getCharacter();
       String retChar = "";
@@ -93,7 +94,6 @@ public class Calculator extends Application {
           retChar = pressedChar;
         }
         if(pressedChar.equals("<")) {
-          // System.out.println("in <");
           if (buff.length()!=0) {
             buff.deleteCharAt(buff.length()-1);
             input.setText(buff.toString());

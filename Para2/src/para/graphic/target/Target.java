@@ -42,6 +42,18 @@ public interface Target{
    *  @param attr 矩形の属性
    */
   public void drawRectangle(int id, int x, int y, int w, int h, Attribute attr);
+
+    /** 三角形を出力する．
+   *  @param id 矩形の識別子
+   *  @param x0 x of first point 
+   *  @param y0 y of first point
+   *  @param x1 x of second point
+   *  @param y1 y of second point
+   *  @param x2 x of third point
+   *  @param y2 y of thirt point
+   *  @param attr 三角形の属性
+   */
+  public void drawTriangle(int id,int x0,int y0,int x1,int y1,int x2,int y2, Attribute attr);
   /** 画像図形を出力する．
    *  @param id 画像図形の識別子
    *  @param x  画像図形の左上隅のx座標
