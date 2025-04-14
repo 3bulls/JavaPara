@@ -159,6 +159,7 @@ public class GameFrame extends Application{
     button.setPrefWidth(100);
     spinner.setPrefHeight(30);
     button.setOnAction(ev->{
+      // this spinner.getVValue only is used as the input circle, when u click the start, read the spinner's number as the id of the circle
         gamestart(spinner.getValue());
       });
     low.getChildren().add(spinner);

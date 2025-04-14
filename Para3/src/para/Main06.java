@@ -20,8 +20,8 @@ public class Main06{
                          new Attribute(200, 250, 200, true)));
     }
     ShapeManager sm2;
-    sm2 = sm1;
-    //sm2 = sm1.duplicate();
+    // sm2 = sm1;
+    sm2 = sm1.duplicate();
     ts1 = new Thread(new Runner(t1, sm1, 1));
     ts2 = new Thread(new Runner(t2, sm2, -1));
   }
@@ -49,6 +49,7 @@ public class Main06{
     }
     public void run(){
       int i=0;
+      System.out.println(Thread.currentThread().getName());
       while(true){
         target.clear();
         target.draw(sm);

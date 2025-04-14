@@ -2,10 +2,13 @@ package para;
 
 import java.util.Scanner;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 import para.graphic.target.*;
 import para.graphic.shape.*;
 import para.graphic.parser.*;
 import para.game.*;
+import javafx.application.Platform;
 
 /** モグラたたきゲームの雛形
  */
@@ -24,6 +27,8 @@ public class Game01 extends GameFrame{
   private int last;
   private  int[] slot;
   Attribute mogattr;
+  private int score;
+  private int count;
   
   public Game01(){
     super(new JavaFXCanvasTarget(WIDTH, HEIGHT));
@@ -34,14 +39,16 @@ public class Game01 extends GameFrame{
     osm = new ShapeManager();
     ism = new ShapeManager();
     rand = new Random(System.currentTimeMillis());
-    slot = new int[MCOUNT]; 
+    slot = new int[MCOUNT];
     mogattr = new Attribute(158,118,38);
+    score = 0;
   }
 
   public void gamestart(int v){
     if(thread != null){
       return;
     }
+    this.countDown();
     thread = new Thread(()->{
         Attribute attr = new Attribute(250,80,80);
         while(true){
@@ -51,14 +58,16 @@ public class Game01 extends GameFrame{
           }
           SynchronizedPoint p = xy.copy();
           if(prev != p.getTime()){
+            // when user clicks the screen
             prev = p.getTime();
-            ism.put(new Circle(v, (int)p.getXY()[0], (int)p.getXY()[1],
-                               20, attr));
+            ism.put(new Circle(v, (int)p.getXY()[0], (int)p.getXY()[1],20, attr));
             Shape s = InsideChecker.check(osm,
                                           new Vec2(p.getXY()[0], p.getXY()[1]));
             if(s != null){
               slot[(s.getID()-10)/10]=0;
               System.out.println(p.getXY()[0]+" "+p.getXY()[1]+" "+p.getTime());
+              score++;
+              this.showScore();
             }
           }else if(300 < System.currentTimeMillis()-prev){
             ism.remove(v);
@@ -82,17 +91,48 @@ public class Game01 extends GameFrame{
         slot[(last+head)%MCOUNT] = duration;
       }
     }
+    // slot[i] store the duration of circle(10+i*10), and reduce radius of 10 per loop(80ms). but actually slot[i]/25 is the radius
     for(int i=0;i<MCOUNT;i++){
       slot[i]=slot[i]-10;
     }
     for(int i=0;i<MCOUNT;i++){
       if(0<slot[i]){
-        osm.put(new Circle(10+i*10, (i%XCOUNT)*130+60, (i/XCOUNT)*130+60,
-                           slot[i]/25,mogattr));
+        // XCOUNT means that at most there XCOUNT in a line
+        // in this case, it means 3*3 grid
+        // osm.put(new Circle(10+i*10, (i%XCOUNT)*130+60, (i/XCOUNT)*130+60, slot[i]/25,mogattr));
+        // i have to say, why use this xxxx/25 to represent the scale, suck code
+        Garden.setMole(10+10*i,(i%XCOUNT)*130+60, (i/XCOUNT)*130+60,slot[i]/25,osm); 
       }else{
-        osm.remove(10+i*10);
+        // osm.remove(10+i*10);
+        Garden.removeMole(10+i*10,osm);
       }
     }
     inputside.draw(osm);
+  }
+
+  private void showScore(){
+    System.out.println("score:"+score);
+    osm.put(new Digit(101,160,550,30, score%10, new Attribute(200,200,200)));
+    osm.put(new Digit(102, 90,550,30, score/10, new Attribute(200,200,200)));
+  }
+
+  private void countDown(){
+    count = 31;
+    Timer timer = new Timer();
+    timer.scheduleAtFixedRate(new TimerTask() {
+      @Override
+      public void run(){
+        count--;
+        System.out.println(count);
+        if (count < 0)  {
+          timer.cancel();
+        } else {
+          Platform.runLater(()->{
+            osm.put(new Digit(103,320,550,30, count%10, new Attribute(0,0,0)));
+            osm.put(new Digit(104,250,550,30, count/10, new Attribute(0,0,0)));
+          });
+        }
+      }
+    }, 0, 1000);
   }
 }
