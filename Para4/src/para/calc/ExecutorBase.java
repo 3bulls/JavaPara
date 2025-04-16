@@ -79,27 +79,23 @@ abstract public class ExecutorBase{
   }
 
   public void showProgress(String op){
+    Stream<Float> st = stack.stream();
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    PrintStream ps = new PrintStream(bos); 
+    ps.print("(");
+    st.forEach(f->{ps.print(f+"|");});
+    ps.print(op+")");
+    state = bos.toString();
+    writeState(state);
 
-    Thread th = new Thread(()->{
-      synchronized(lock){
-        try{
-          Stream<Float> st = stack.stream();
-          ByteArrayOutputStream bos = new ByteArrayOutputStream();
-          PrintStream ps = new PrintStream(bos); 
-          ps.print("(");
-          st.forEach(f->{ps.print(f+"|");});
-          ps.print(op+")");
-          state = bos.toString();
-          writeState(state);
-              lock.wait();
-              try{
-                Thread.sleep(2000);
-              }catch(InterruptedException ex){
-              }
-        }
-      }
-    });
-    th.start();
+    System.err.print("showprgress" + Thread.currentThread().getName()+" ");//hint
+
+    try{
+      Thread.sleep(2000);
+    }catch(InterruptedException ex){
+      ex.printStackTrace();
+    }
+
     //rec(30); //no meaning work to waste time.
   }
 

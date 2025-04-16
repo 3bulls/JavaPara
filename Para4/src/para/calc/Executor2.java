@@ -12,18 +12,15 @@ public class Executor2 extends ExecutorBase implements Executor{
   }
 
   public void writeState(String state){
-    System.err.println(Thread.currentThread().getName());//hint
+    System.err.print(Thread.currentThread().getName()+" ");//hint
     // TODO: 1.output every step to the calculator (you should immediately flush the canvsa)
     // this state is the content of stack
     
     System.out.println("state:"+state);
     Platform.runLater(()->{
-        synchronized(lock){
-          label.setText(state);
-          System.err.println("ui+"+Thread.currentThread().getName());//hint
-          lock.notify();
-        }
-      });
+        label.setText(state);
+        System.err.println("ui+"+Thread.currentThread().getName());//hint
+    });
   }
 
   synchronized public String operation(String data){

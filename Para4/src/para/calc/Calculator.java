@@ -8,7 +8,7 @@ import javafx.scene.shape.*;
 import javafx.scene.paint.*;
 import javafx.scene.layout.*;
 import javafx.scene.control.*;
-
+import javafx.application.Platform;
 /**
  * JavaFX 電卓アプリケーションのメインクラス
  */
@@ -68,10 +68,18 @@ public class Calculator extends Application{
     }
     buttoncal.setOnAction(ev->{
         System.out.println("[["+buff.toString()+"]]");
-        String mid;
-        mid = ex.operation(buff.toString());
-        output.setText(mid);
-        buff.delete(0,buff.length());
+        Thread calcTh = new Thread(new Runnable(){
+          @Override
+          public void run(){
+            String mid;
+            mid = ex.operation(buff.toString());
+            Platform.runLater(()->{
+              output.setText(mid);
+            });
+            buff.delete(0,buff.length());
+          }
+        });
+        calcTh.start();
       });
     buttondel.setOnAction(ev->{
         if(buff.length()!=0){
