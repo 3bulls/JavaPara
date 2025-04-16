@@ -9,6 +9,7 @@ import javafx.scene.paint.*;
 import javafx.scene.layout.*;
 import javafx.scene.control.*;
 import javafx.application.Platform;
+import java.util.concurrent.*;;
 /**
  * JavaFX 電卓アプリケーションのメインクラス
  */
@@ -21,6 +22,9 @@ public class Calculator extends Application{
   final StringBuilder buff;
   /** 数式解釈器 */
   final Executor ex;
+  /** The thread pool for calculation */
+  final ExecutorService singlePool;
+
   /** 電卓の状態を保持するデータ領域、逆ポーランド記法解釈器の準備といった初期化行う.
    */
   public Calculator(){
@@ -29,6 +33,7 @@ public class Calculator extends Application{
     buff = new StringBuilder();
     // ex = new Executor1();
     ex = new Executor2(output);
+    singlePool = Executors.newSingleThreadExecutor();
   }
   /** ボタンのラベル */
   final String[] buttonname = {"9","8","7","+",
@@ -68,18 +73,38 @@ public class Calculator extends Application{
     }
     buttoncal.setOnAction(ev->{
         System.out.println("[["+buff.toString()+"]]");
-        Thread calcTh = new Thread(new Runnable(){
+        // TODO: create a single thread pool
+        // everytime when you click the "=" button
+        // you have a calculate task submitted to the pool
+
+        // version1: 
+        // Thread calcTh = new Thread(new Runnable(){
+        //   @Override
+        //   public void run(){
+        //     String mid;
+        //     mid = ex.operation(buff.toString());
+        //     buff.delete(0,buff.length());
+        //     Platform.runLater(()->{
+        //       output.setText(mid);
+        //     });
+        //   }
+        // });
+        // calcTh.start();
+
+
+        // version2: a single thread pool
+        singlePool.submit(new Runnable(){
           @Override
           public void run(){
             String mid;
-            mid = ex.operation(buff.toString());
+            String inputStr = buff.toString();
+            buff.delete(0,buff.length());
+            mid = ex.operation(inputStr);
             Platform.runLater(()->{
               output.setText(mid);
             });
-            buff.delete(0,buff.length());
           }
         });
-        calcTh.start();
       });
     buttondel.setOnAction(ev->{
         if(buff.length()!=0){
