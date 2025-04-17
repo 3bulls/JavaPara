@@ -43,6 +43,10 @@ public class TextTarget implements Target{
     camimage = camdev.createBufferedImage(); 
   }
 
+  public void setOutStream(OutputStream stream){
+    this.pstream = new PrintStream(stream,true);
+  }
+
   @Override
   public synchronized void clear(){
    pstream.println("target clear");
