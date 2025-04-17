@@ -21,7 +21,7 @@ public class Main09{
   final public int PORTNO=30000;
   final int MAXCONNECTION=3;
   final Target target;
-  final TextTarget textTarget;
+  private TextTarget[] textTargetArr;
   final ShapeManager[] sms;
   final ServerSocket ss;
   final ArrayList<Socket> listenClient = new ArrayList<Socket>();
@@ -33,7 +33,6 @@ public class Main09{
    */
   public Main09(){
     target = new JavaFXTarget("Server", 320*MAXCONNECTION, 240);
-    textTarget = new TextTarget(320*MAXCONNECTION, 240,System.out);
     ServerSocket tmp=null;
     try{
       tmp = new ServerSocket(PORTNO);
@@ -45,6 +44,10 @@ public class Main09{
     sms = new ShapeManager[MAXCONNECTION];
     for(int i=0;i<MAXCONNECTION;i++){
       sms[i] = new OrderedShapeManager();
+    }
+    textTargetArr = new TextTarget[MAXCONNECTION];
+    for(int i=0;i<MAXCONNECTION;i++){
+      textTargetArr[i] = new TextTarget(320*MAXCONNECTION, 240,System.out);
     }
   }
 
@@ -60,8 +63,9 @@ public class Main09{
           for(ShapeManager sm: sms){
             synchronized(sm){
               target.draw(sm);
-              // printToAllClient(sm);
-              textTarget.draw(sm);
+              for (TextTarget t: textTargetArr) {
+                t.draw(sm);
+              }
             }
           }
           target.flush();
@@ -104,10 +108,6 @@ public class Main09{
     m.start();
   } 
 
-  // private void printToAllClient(){
-
-  // }
-
   class Main09HandleTask implements Runnable{
     Socket s;
     public Main09HandleTask(Socket s){
@@ -122,7 +122,7 @@ public class Main09{
         listenClient.add(socket);
         System.out.println("you have a connect " + socket.getRemoteSocketAddress());
         BufferedReader r = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        textTarget.setOutStream(socket.getOutputStream());
+        textTargetArr[i].setOutStream(socket.getOutputStream());
         ShapeManager dummy = new ShapeManager();
         sms[i].clear();
         sms[i].put(new Rectangle(10000*i,320*i,0,320,240,
