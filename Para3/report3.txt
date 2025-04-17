@@ -9,13 +9,22 @@
 1.1) OrderedShapeManagerの実装についての説明
 利用したクラスについてや、最小限の実装行で済ませる工夫などを説明して下さい。
 
+public class OrderedShapeManager extends ShapeManager{
+    /**
+     *  priorityQueue
+     */
+    public OrderedShapeManager(){
+        super();
+        this.data = new PriorityQueue<Shape>(Comparator.comparing(Shape::getID).reversed());
+    }
+}
 
-
-
+PriorityQueue is a extension from AbstractCollection.
+But it will organize its data with wised sequence.
 
 1.2)
-空欄Aに入る語は：
-空欄Bに入る語は：
+空欄Aに入る語は：2 カプセル化
+空欄Bに入る語は：６　モニタ
 
 
 
@@ -26,16 +35,16 @@
 
 スレッド名   |　役割
 ---------------------------------
-
+JavaFX Application Thread | the slider's listener, change the value
+Thread-2 | loop, draw the picture accroding to the value
 
 
 
 2.2)
 ユーザ視点でのプログラムの不具合
 
-
-
-
+i think it is hard to see bad situation, because the flush rate is pretty high.
+only thing, i can image is that when user change the value, but the value will not immediately be applied on the picture.
 
 
 不具合の原因についての講義で説明されたプログラムを処理する仕組みに基づいた説明
@@ -48,30 +57,23 @@
 3.1)
 配布されたpara.Main06による仕様のように動かない挙動の説明
 
-
-
-
-
-
-
+two threads have the same ShapeManager, so the sequence of sm.put cannot be assure.
 
 
 3.2)
 つぎのどちらかの行を消して回答せよ
-メソッドduplicate()は deep copy である
-メソッドduplicate()は shallow copy である。
+メソッドduplicate()は deep copy である  まる
+メソッドduplicate()は shallow copy である。　ばつ
 
 スレッドセーフであると考える場合、その理由の説明
 
-
-
-
-
+スレッドセーフ。
+1. atomic
+2. visibility
+3. ordering
 
 
 スレッドセーフでないと考える場合、ソースコード修正部分とその説明
-
-
 
 
 
@@ -82,26 +84,28 @@
 ２つのスレッド
 １つ目のスレッドとその役割は次のとおり
 
-
+application Start.
+mainthread: javafx, the whole UI, and listening the point,x,y of user clicked area
 
 
 ２つ目のスレッドとその役割は次のとおり
 
-
+thread: when click the start button, the thread will run loop, draw output pic on the canvas, and when clicked, it will compare the x,y to current stored point
 
 
 4.2)
 para.game.GameFrameのメンバ変数xyについてsynchronizedメソッドによる同
 期を行わなかった場合に生じる不正確なデータの処理の例は次のとおり
 
-
-
+set xy, need to write 3 kinds of data,
+copy xy, need to read 3 kings of data.
+if it trys to write data, but only one has been modified.
+at the same time, you need to read the data, and you will get one newest, but two old data.
 
 
 volatile修飾では不十分であることの理由
 
-
-
+you need to wirte the data, and you need to keep multi data modified at the same time.
 
 
 
@@ -110,8 +114,7 @@ para.game.GameFrameのメンバ変数leftonやrightonにvolatile修飾を付け�
 とでマルチスレッドに対応できることの説明
 
 
-
-
+it is just one operation, it is atomic.\
 
 
 

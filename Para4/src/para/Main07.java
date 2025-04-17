@@ -63,24 +63,35 @@ public class Main07{
   /** 受信の処理をする
    */
   public void start(){
-    int i=0;
-    while(true){
-      try(Socket s = ss.accept()){
-        BufferedReader r =
-          new BufferedReader(new InputStreamReader(s.getInputStream()));
-        ShapeManager dummy = new ShapeManager();
-        sms[i].clear();
-        sms[i].put(new Rectangle(10000*i,320*i,0,320,240,
-                                 new Attribute(0,0,0,true)));
-        MainParser parser
-          = new MainParser(new TranslateTarget(sms[i],
-                            new TranslationRule(10000*i, new Vec2(320*i,0))),
-                           dummy);
-        parser.parse(new Scanner(r));
-      }catch(IOException ex){
-        System.err.print(ex);
-      }
-      i=(i+1)%MAXCONNECTION;
+
+      try (ss) {
+        while(true){
+          Socket s = ss.accept();
+          new Thread(()->{
+            int i=0;
+            try(Socket socket = s){
+              System.out.println("you have a connect " + socket.getRemoteSocketAddress());
+              BufferedReader r =
+                new BufferedReader(new InputStreamReader(socket.getInputStream()));
+              ShapeManager dummy = new ShapeManager();
+              sms[i].clear();
+              sms[i].put(new Rectangle(10000*i,320*i,0,320,240,
+                                        new Attribute(0,0,0,true)));
+              MainParser parser
+                = new MainParser(new TranslateTarget(sms[i],
+                                  new TranslationRule(10000*i, new Vec2(320*i,0))),
+                                  dummy);
+              parser.parse(new Scanner(r));
+              System.out.println("owari");
+            }catch(IOException e){
+              System.err.print(e);
+            }
+          }).start();
+        }
+      // i=(i+1)%MAXCONNECTION;
+    } catch(IOException ex){
+      System.err.println(ex);
+      System.exit(1);
     }
   }
   
