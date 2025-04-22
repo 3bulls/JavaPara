@@ -1,5 +1,4 @@
 package para;
-
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
@@ -12,25 +11,27 @@ import java.util.concurrent.atomic.*;
 import para.graphic.target.*;
 import para.graphic.shape.*;
 import para.graphic.parser.MainParser;
+import para.Main07;
 
 /** クライアントからの通信を受けて描画するサーバプログラム。
- * 監視ポートは30000番
- */
-public class Main07{
+* 監視ポートは30000番
+*/
+public class Main09{
   final public int PORTNO=30000;
   final int MAXCONNECTION=3;
   final Target target;
+  private TextTarget[] textTargetArr;
   final ShapeManager[] sms;
   final ServerSocket ss;
+  final ArrayList<Socket> listenClient = new ArrayList<Socket>();
 
   final ExecutorService pool = Executors.newFixedThreadPool(3);
 
   /** 受け付け用ソケットを開くこと、受信データの格納場所を用意すること
-   * を行う
-   */
-  public Main07(){
+  * を行う
+  */
+  public Main09(){
     target = new JavaFXTarget("Server", 320*MAXCONNECTION, 240);
-    //target = new TextTarget(System.out);
     ServerSocket tmp=null;
     try{
       tmp = new ServerSocket(PORTNO);
@@ -43,10 +44,14 @@ public class Main07{
     for(int i=0;i<MAXCONNECTION;i++){
       sms[i] = new OrderedShapeManager();
     }
+    textTargetArr = new TextTarget[MAXCONNECTION];
+    for(int i=0;i<MAXCONNECTION;i++){
+      textTargetArr[i] = new TextTarget(320*MAXCONNECTION, 240,System.out);
+    }
   }
 
   /** 受け付けたデータを表示するウィンドウの初期化とそこに受信データを表示するスレッドの開始
-   */
+  */
   public void init(){
     target.init();
     target.clear();
@@ -57,6 +62,9 @@ public class Main07{
           for(ShapeManager sm: sms){
             synchronized(sm){
               target.draw(sm);
+              for (TextTarget t: textTargetArr) {
+                t.draw(sm);
+              }
             }
           }
           target.flush();
@@ -69,7 +77,7 @@ public class Main07{
   }
 
   /** 受信の処理をする
-   */
+  */
   public void start(){
 
     /*  ***important***: you need to use try, and use while in this try area 
@@ -82,68 +90,73 @@ public class Main07{
       while(true){
         // !!! if you write try(Socket s = ss.accept()){....new thread}
         //      when try area is done, the socket resouce will be released by main thread
+
         Socket s = ss.accept();
-        pool.submit(new HandleTask(sms,s));
+        // pool.submit(new Main09HandleTask(sms,s,textTarget));
+        pool.submit(new Main09HandleTask(s));
       }
     } catch(IOException ex){
       System.err.println(ex);
       System.exit(1);
     }
   }
-  
+
   public static void main(String[] args){
-    Main07 m = new Main07();
+    Main09 m = new Main09();
     m.init();
     m.start();
   } 
-}
 
-class HandleTask implements Runnable{
-  ShapeManager[] sms;
-  Socket s;
-  public HandleTask(ShapeManager[] sms,Socket s){
-    this.sms = sms;
-    this.s = s;
-  }
+  class Main09HandleTask implements Runnable{
+    Socket s;
+    public Main09HandleTask(Socket s){
+      this.s = s;
+    }
 
-  @Override
-  public void run() {
-    int i = ThreadId.get();
-    System.out.println("thread"+i);
-    try(Socket socket = s){
-      System.out.println("you have a connect " + socket.getRemoteSocketAddress());
-      BufferedReader r =
-        new BufferedReader(new InputStreamReader(socket.getInputStream()));
-      ShapeManager dummy = new ShapeManager();
-      sms[i].clear();
-      sms[i].put(new Rectangle(10000*i,320*i,0,320,240,
-                                new Attribute(0,0,0,true)));
-      MainParser parser
-        = new MainParser(new TranslateTarget(sms[i],
-                          new TranslationRule(10000*i, new Vec2(320*i,0))),
-                          dummy);
-      parser.parse(new Scanner(r));
-      System.out.println("owari");
-    }catch(IOException e){
-      System.err.print(e);
+    @Override
+    public void run() {
+      int i = Main09ThreadId.get();
+      System.out.println("thread"+i);
+      try(Socket socket = s){
+        listenClient.add(socket);
+        System.out.println("you have a connect " + socket.getRemoteSocketAddress());
+        BufferedReader r = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        textTargetArr[i].setOutStream(socket.getOutputStream());
+        ShapeManager dummy = new ShapeManager();
+        sms[i].clear();
+        sms[i].put(new Rectangle(10000*i,320*i,0,320,240,
+                                  new Attribute(0,0,0,true)));
+        MainParser parser
+          = new MainParser(new TranslateTarget(sms[i],
+                            new TranslationRule(10000*i, new Vec2(320*i,0))),
+                            dummy);
+        parser.parse(new Scanner(r));
+        System.out.println("owari");
+      }catch(IOException e){
+        System.err.print(e);
+      }finally{
+        sms[i].clear();
+        listenClient.remove(this.s);
+      }
     }
   }
-}
 
-class ThreadId {
-  // Atomic integer containing the next thread ID to be assigned
-  private static final AtomicInteger nextId = new AtomicInteger(0);
+  class Main09ThreadId {
+    // Atomic integer containing the next thread ID to be assigned
+    private static final AtomicInteger nextId = new AtomicInteger(0);
 
-  // Thread local variable containing each thread's ID
-  private static final ThreadLocal<Integer> threadId =
-      new ThreadLocal<Integer>() {
-          @Override protected Integer initialValue() {
-              return nextId.getAndIncrement()%3;
-      }
-  };
+    // Thread local variable containing each thread's ID
+    private static final ThreadLocal<Integer> threadId =
+        new ThreadLocal<Integer>() {
+            @Override protected Integer initialValue() {
+                return nextId.getAndIncrement()%3;
+        }
+    };
 
-  // Returns the current thread's unique ID, assigning it if necessary
-  public static int get() {
-      return threadId.get();
+    // Returns the current thread's unique ID, assigning it if necessary
+    public static int get() {
+        return threadId.get();
+    }
   }
+
 }

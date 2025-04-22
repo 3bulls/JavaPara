@@ -12,7 +12,6 @@ import java.util.concurrent.atomic.*;
 import para.graphic.target.*;
 import para.graphic.shape.*;
 import para.graphic.parser.MainParser;
-import para.Main07;
 
 /** クライアントからの通信を受けて描画するサーバプログラム。
  * 監視ポートは30000番
