@@ -52,12 +52,15 @@ public class Main11{
     CollisionChecker ccp;
     switch(selector){
     case "SINGLE":
+      System.out.println("Single");
       ccp = new CollisionCheckerParallel2(false);
       break;
     case "PARALLEL":
+      System.out.println("ParallelStream");
       ccp = new CollisionCheckerParallel2(true);
       break;
     case "POOL":
+      System.out.println("ThreadPool");
       ccp = new CollisionCheckerParallel3(20);
       break;
     default:

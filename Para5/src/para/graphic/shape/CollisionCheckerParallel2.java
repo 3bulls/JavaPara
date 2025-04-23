@@ -68,6 +68,7 @@ public class CollisionCheckerParallel2 extends CollisionChecker{
           }
         }).
       //      min(CollisionCheckerParallel2::compare);
+      // only hit one shape
       min((l,r)
           ->{if(l.time<r.time){
               return -1;
