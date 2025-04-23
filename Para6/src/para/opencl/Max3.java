@@ -26,10 +26,40 @@ public class Max3{
     CLSetup cl = CLSetupCreator.createCLSetup();
     cl.initContext();
 
+    FloatBuffer tmpfb;
+    tmpfb = loadData("data/dataa.txt");
+    CLBuffer<FloatBuffer> BufferA = cl.createBuffer(tmpfb,READ_ONLY);
+    tmpfb.rewind();
+    tmpfb = loadData("data/datab.txt");
+    CLBuffer<FloatBuffer> BufferB = cl.createBuffer(tmpfb,READ_ONLY);
+    tmpfb.rewind();
+    tmpfb = loadData("data/datac.txt");
+    CLBuffer<FloatBuffer> BufferC = cl.createBuffer(tmpfb,READ_ONLY);
+    int datasize = tmpfb.limit();
+    CLCommandQueue queue = cl.createQueue();
 
+    CLProgram program = cl.createProgramFromResource(this,"max3.cl");
+    CLKernel kernel = program.createCLKernel("Max");
+    kernel.putArgs(BufferA, BufferB, BufferC);
+    kernel.setArg(3,datasize);
 
-
-
+    BufferC.getBuffer().rewind();
+    //to device
+    //デバイスへ転送、並列演算、演算結果の取得
+    queue.putWriteBuffer(BufferA, false)//BufferAのデータをカーネル側へ転送指令
+      .putWriteBuffer(BufferB, false)//BufferBのデータをカーネル側へ転送指令
+      .putBarrier() //今までの指令がすべて完了するまで待つ
+      .put1DRangeKernel(kernel, 0, datasize, 1)//演算指令
+      .putBarrier() //今までの指令がすべて完了するまで待つ
+      .putReadBuffer(BufferC, true);//BufferCのデータをホスト側へ転送指令
+                                    //転送完了まで待つ
+    //演算結果の出力
+    FloatBuffer fb = BufferC.getBuffer();
+    fb.rewind();
+    for(int i=0;i<fb.limit();i++){
+      System.out.print(fb.get()+" ");
+    }
+    System.out.println();
 
     cl.release();
   }

@@ -68,19 +68,22 @@ the ave object is shared by all threads. and all threads will change the content
 回答2 :
 2.1)
 出力される時間の意味
-
+time that the thread finish all 100 rounds of checking collision and remove the collided shap.
 
 
 達成された高速化の数値的説明
-
-
-
+//no parallel 
+10365msec
+//parallel stream
+4462msec
+//multi thread pool
+9602msec
 
 
 計測時間の信頼性を向上させるために行った工夫、計測で注意した点
 
 
-
+you need to ensure which thread time will be measured.
 
 
 2.2)
@@ -92,8 +95,11 @@ the ave object is shared by all threads. and all threads will change the content
 
 調査により判明した衝突判定部分の高速化前後の処理速度の比率
 
+single: every round will cost 100ms, so 100*100 = 10000ms
 
+parallel: use the parallelStream to make the check of every shape can be paralleled. short the cost to 50, so 50*100 = 5000ms
 
+multiThread:7826msec use the threadPool, every task cost 100ms, but tasks canbe paralell, but the creation and switch of parallel will cost some extra time.
 
 
 

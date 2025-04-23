@@ -42,6 +42,7 @@ public class HelloOpenCL{
     kernel.setArg(3,datasize);
 
     BufferC.getBuffer().rewind();
+    //to device
     //デバイスへ転送、並列演算、演算結果の取得
     queue.putWriteBuffer(BufferA, false)//BufferAのデータをカーネル側へ転送指令
       .putWriteBuffer(BufferB, false)//BufferBのデータをカーネル側へ転送指令
@@ -75,9 +76,10 @@ public class HelloOpenCL{
       System.exit(1);
     }
     while(sc.hasNextFloat()){flt.add(sc.nextFloat());}
+    
     FloatBuffer fb = 
       ByteBuffer.allocateDirect(flt.size()*java.lang.Float.SIZE/8) 
-                 // java.lang.Float.SIZE はfloat型のbit数を意味する定数 
+                // java.lang.Float.SIZE はfloat型のbit数を意味する定数 
       .order(ByteOrder.nativeOrder())//float型を表すバイト順序にnativeを指定
       .asFloatBuffer();
     int i=0;
