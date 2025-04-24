@@ -61,7 +61,7 @@ public class TargetDelayFilter extends TargetFilter{
       cllatest = cllatest.cloneWith(oneshot);
       queue.putWriteBuffer(cllatest,false);//cllatestのデータをカーネルプログラムへ
     }
-    kernel.setArg(2, cllatest);       
+    kernel.setArg(2, cllatest);
     kernel.setArg(3, clold);
     kernel.setArg(4, output);
     kernel.setArg(5, parameter);

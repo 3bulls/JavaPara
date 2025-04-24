@@ -40,6 +40,7 @@ public class TargetMosaicFilter extends TargetFilter{
       kernel.setArg(0, Camera.WIDTH);
       kernel.setArg(1, Camera.HEIGHT);
       kernel.setArg(2, input);//コンスタントメモリ
+      // the data in index 3 is null, but the size is 8*8*3*4
       kernel.setNullArg(3, BLOCKSIZE*3*4);//ローカルメモリ, 色3Channel, int4byte
       kernel.setArg(4, output);//グローバルメモリ
       kernel.setArg(5, 0);//使っていないパラメータ
