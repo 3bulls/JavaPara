@@ -38,6 +38,10 @@ public class HelloOpenCL{
 
     CLProgram program = cl.createProgramFromResource(this,"add.cl");
     CLKernel kernel = program.createCLKernel("Add");
+
+    // putArgs & setArg, both transfer arguments to the kernel function
+    // putArgs follow the sequence *** and the arg must be CLMemory<?>, so, these must be buffer
+    // setArg(index,arument) put argument in the index of function. it can be scale value
     kernel.putArgs(BufferA, BufferB, BufferC);
     kernel.setArg(3,datasize);
 
