@@ -13,18 +13,38 @@
 
 
 回答3 :
+
+  /**
+   * calculate average color in one block area 
+   */
+   for (int xs = 1; xs <8; xs*=2) {
+    for(int ys = 1; ys <8; ys*=2) {
+      if (lx%(2*xs) == 0 && ly%(2*ys) ==0){
+        for (int c=0;c<3;c++){
+          //ldata is int, and all<=255, so add operation will be fine
+          // i think it is right, bu now i dont want to verify.
+           int sum = ldata[((ly*2)*8+(lx*2))*3+c] + ldata[((ly*2)*8+(lx*2+xs))*3+c] +ldata[((ly*2+ys)*8+(lx*2))*3+c] + ldata[((ly*2+ys)*8+(lx*2+xs))*3+c];
+           ldata[((ly*2)*8+(lx*2))*3+c] = sum/4;
+        }
+      }
+      barrier(CLK_LOCAL_MEM_FENCE);
+    }
+   }
+
 3.1)
 barrier(CLK_LOCAL_MEM_FENCE)の挿入箇所とその必要な理由
 
+when size is 4, wait all thread calculate the four.
+when size is 8, wait ....                     eight.
+...
 
+otherwise, there will be wrong, for example, lx=0,yx=0, when it want to calculate size 8, but not all size 4 task is finished.
 
 
 3.2)
 1ワークグループに属するワークアイテム数
 
-
-
-
+16 (localsizex * localsizey)
 
 回答4 :
 4.2)

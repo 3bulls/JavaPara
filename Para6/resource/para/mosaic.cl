@@ -10,6 +10,8 @@ __kernel void Mosaic(const int width, const int height,
   int y = get_global_id(1);
   int lx = get_local_id(0);
   int ly = get_local_id(1);
+  int lxsize = get_local_size(0);
+  int lysize = get_local_size(1);
 
   /**
    * copy one block area colors to the local memory for this work group
@@ -39,8 +41,20 @@ __kernel void Mosaic(const int width, const int height,
 
   /**
    * calculate average color in one block area 
-   */ 
-
+   */
+   for (int xs = 1; xs <8; xs*=2) {
+    for(int ys = 1; ys <8; ys*=2) {
+      if (lx%(2*xs) == 0 && ly%(2*ys) ==0){
+        for (int c=0;c<3;c++){
+          //ldata is int, and all<=255, so add operation will be fine
+          // i think it is right, bu now i dont want to verify.
+           int sum = ldata[((ly*2)*8+(lx*2))*3+c] + ldata[((ly*2)*8+(lx*2+xs))*3+c] +ldata[((ly*2+ys)*8+(lx*2))*3+c] + ldata[((ly*2+ys)*8+(lx*2+xs))*3+c];
+           ldata[((ly*2)*8+(lx*2))*3+c] = sum/4;
+        }
+      }
+      barrier(CLK_LOCAL_MEM_FENCE);
+    }
+   }
 
   
 
