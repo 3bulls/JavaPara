@@ -19,8 +19,11 @@ __kernel void Gray(const int width, const int height,
   
 
   // the following is do nothing sample
-  output[(y*width+x)*4  ] = input[addr  ];
-  output[(y*width+x)*4+1] = input[addr+1];
-  output[(y*width+x)*4+2] = input[addr+2];
+  int r = input[addr  ]*0.212671;
+  int g = input[addr+1]*0.715160;
+  int b = input[addr+2]*0.072169;
+  output[(y*width+x)*4  ] = r+g+b;
+  output[(y*width+x)*4+1] = r+g+b;
+  output[(y*width+x)*4+2] = r+g+b;
   output[(y*width+x)*4+3] = 0xff;
 }

@@ -4,7 +4,7 @@ __kernel void Max3(__constant float* a, __constant float* b, __constant float* c
                     __global float* d, int sizeOfArr, int numOfArrs){
   // get index into global data array
     int i = get_global_id(0);
-    if (numOfArrs<i) return;
+    if (sizeOfArr<i) return;
     //**this will find the max in each array */
     // int result;
     // switch(i){
