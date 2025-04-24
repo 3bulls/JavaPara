@@ -38,7 +38,7 @@ public class Main14 extends Application{
     thread = new Thread(new Runnable(){
         public void run(){
           while(true){
-            //System.out.println(Thread.currentThread().getName());
+            System.out.println(Thread.currentThread().getName());
             target.draw(sm);
             target.flush();
             try{
@@ -58,7 +58,8 @@ public class Main14 extends Application{
     slider.valueProperty().addListener(
       (ObservableValue<? extends Number> ov,
        Number old_val, Number new_val)->{
-        //System.out.println(Thread.currentThread().getName());
+        System.out.println(Thread.currentThread().getName());
+        // TODO: this parameter need to be synchronized
         filter.setParameter((float)slider.getValue());
       });
     Scene scene = new Scene(pane);
