@@ -23,12 +23,22 @@ public class Main15 extends Application{
   final ShapeManager sm;
   final String filename;
   final String kernelname;
+  private static  String[] fileAndKernel;
+
+  public static void setFileAndKernel(String []args){
+    Main15.fileAndKernel = args;
+  }
 
   public Main15(){
     this("imagefilter.cl", "Filter1");
   }
   
   public Main15(String filename, String kernelname){
+    if (Main15.fileAndKernel!=null && Main15.fileAndKernel.length==2){
+      filename = Main15.fileAndKernel[0];
+      kernelname = Main15.fileAndKernel[1];
+    }
+
     this.filename = filename;
     this.kernelname = kernelname;
     sm = new OrderedShapeManager();
