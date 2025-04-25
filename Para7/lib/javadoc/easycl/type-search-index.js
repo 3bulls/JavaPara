@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"easycl","l":"CLAWTSetup"},{"p":"easycl","l":"CLAWTSetupImpl"},{"p":"easycl","l":"CLBaseSetup"},{"p":"easycl","l":"CLCanvas"},{"p":"easycl","l":"CLPlate"},{"p":"easycl","l":"CLSetup"},{"p":"easycl","l":"CLSetupCreator"},{"p":"easycl","l":"CLWindow"}];updateSearchResults();
